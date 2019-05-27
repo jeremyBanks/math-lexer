@@ -40,34 +40,28 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn next_token(&mut self) -> Token {
-        let mut c: char;
         match self.input.next() {
-            Some(ch) => {
-                c = ch
+            Some(c) => match c {
+                '(' | ')' => self.tokenize_paren(c),
+                _ => panic!("Unexpected character at line {}: {}", self.line, c)
             },
-            None => return Token { token_type: EndOfInput, line: self.line, column: self.column}
+            None => Token { token_type: EndOfInput, line: self.line, column: self.column}
         }
+    }
 
-        
-        if char_utils::is_paren(c) {
-            self.recog_paren(c)
-        }
+    fn tokenize_identifier(&mut self, first_char: char) -> Token {
         unimplemented!()
     }
 
-    pub fn recog_identifier(&mut self, first_char: char) -> Token {
+    fn tokenize_number(&mut self, first_char: char) -> Token {
         unimplemented!()
     }
 
-    pub fn recog_number(&mut self, first_char: char) -> Token {
+    fn tokenize_operator(&mut self, first_char: char) -> Token {
         unimplemented!()
     }
 
-    pub fn recog_operator(&mut self, first_char: char) -> Token {
-        unimplemented!()
-    }
-
-    pub fn recog_paren(&mut self, c: char) -> Token {
+    fn tokenize_paren(&mut self, c: char) -> Token {
         let pos = self.position;
         let line = self.line;
         let col = self.column;

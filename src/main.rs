@@ -1,0 +1,95 @@
+use std::str::Chars;
+use std::iter::Enumerate;
+
+mod tokens;
+mod char_utils;
+
+use tokens::TokenType::{
+    Identifier,
+    Number,
+    ArithOperator,
+    ComparisonOperator,
+    Assignment,
+    LeftParen,
+    RightParen,
+    EndOfInput
+};
+
+struct Token {
+    token_type: tokens::TokenType,
+    line: u32,
+    column: u32
+}
+
+struct Lexer<'a> {
+    input: Chars<'a>,
+    position: u64,
+    line: u32,
+    column: u32
+}
+
+impl<'a> Lexer<'a> {
+    pub fn new(input: &'a String) -> Self {
+        let e = input.chars();
+        Lexer {
+            input: e,
+            position: 0,
+            line: 0,
+            column: 0
+        }
+    }
+
+    pub fn next_token(&mut self) -> Token {
+        let mut c: char;
+        match self.input.next() {
+            Some(ch) => {
+                c = ch
+            },
+            None => return Token { token_type: EndOfInput, line: self.line, column: self.column}
+        }
+
+        
+        if char_utils::is_paren(c) {
+            self.recog_paren(c)
+        }
+        unimplemented!()
+    }
+
+    pub fn recog_identifier(&mut self, first_char: char) -> Token {
+        unimplemented!()
+    }
+
+    pub fn recog_number(&mut self, first_char: char) -> Token {
+        unimplemented!()
+    }
+
+    pub fn recog_operator(&mut self, first_char: char) -> Token {
+        unimplemented!()
+    }
+
+    pub fn recog_paren(&mut self, c: char) -> Token {
+        let pos = self.position;
+        let line = self.line;
+        let col = self.column;
+
+        self.position += 1;
+        self.column += 1;
+
+        if c == '(' {
+            Token { token_type: LeftParen, line: line, column: col }
+        } else {
+            Token { token_type: RightParen, line: line, column: col }
+        }
+    }
+
+    pub fn run(&self) {
+        
+    }
+}
+
+fn main() {
+    let s = String::from("Hello world");
+    let e = s.chars().enumerate();
+    println!("{}", s);
+
+}

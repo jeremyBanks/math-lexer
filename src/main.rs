@@ -21,31 +21,28 @@ struct Token {
     column: u32
 }
 
-struct Lexer<'a> {
-    input: Chars<'a>,
+struct Lexer {
+    input: String,
     position: u64,
     line: u32,
     column: u32
 }
 
-impl<'a> Lexer<'a> {
-    pub fn new(input: &'a String) -> Self {
-        let e = input.chars();
+impl Lexer {
+    pub fn new(input: String) -> Self {
         Lexer {
-            input: e,
+            input: input,
             position: 0,
             line: 0,
             column: 0
         }
     }
 
-    pub fn next_token(&mut self) -> Token {
-        match self.input.next() {
-            Some(c) => match c {
-                '(' | ')' => self.tokenize_paren(c),
-                _ => panic!("Unexpected character at line {}: {}", self.line, c)
-            },
-            None => Token { token_type: EndOfInput, line: self.line, column: self.column}
+    pub fn next_token(&mut self, i: u64, c: char) -> Token {
+        match c {
+            '(' | ')' => self.tokenize_paren(c),
+            '+' | '-' | '*' | '/' | '>' | '<' | '=' => self.tokenize_operator(c), // need to handle >=, =<, and ==
+            _ => panic!("Unexpected character at line {}: {}", self.line, c)
         }
     }
 
@@ -76,8 +73,11 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn run(&self) {
-        
+    pub fn run(&mut self) {
+        let clone = self.input.clone();
+        for (i, c) in clone.chars().enumerate() {
+            self.next_token(i as u64, c);
+        }
     }
 }
 

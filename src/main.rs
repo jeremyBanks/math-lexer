@@ -23,7 +23,6 @@ struct Token {
 
 struct Lexer {
     input: String,
-    position: u64,
     line: u32,
     column: u32
 }
@@ -32,7 +31,6 @@ impl Lexer {
     pub fn new(input: String) -> Self {
         Lexer {
             input: input,
-            position: 0,
             line: 0,
             column: 0
         }
@@ -41,7 +39,7 @@ impl Lexer {
     pub fn next_token(&mut self, i: u64, c: char) -> Token {
         match c {
             '(' | ')' => self.tokenize_paren(c),
-            '+' | '-' | '*' | '/' | '>' | '<' | '=' => self.tokenize_operator(c), // need to handle >=, =<, and ==
+            '+' | '-' | '*' | '/' | '>' | '<' | '=' => self.tokenize_operator(i, c),
             _ => panic!("Unexpected character at line {}: {}", self.line, c)
         }
     }
@@ -54,16 +52,14 @@ impl Lexer {
         unimplemented!()
     }
 
-    fn tokenize_operator(&mut self, first_char: char) -> Token {
+    fn tokenize_operator(&mut self, i: u64, c: char) -> Token {
         unimplemented!()
     }
 
     fn tokenize_paren(&mut self, c: char) -> Token {
-        let pos = self.position;
         let line = self.line;
         let col = self.column;
 
-        self.position += 1;
         self.column += 1;
 
         if c == '(' {
@@ -76,7 +72,11 @@ impl Lexer {
     pub fn run(&mut self) {
         let clone = self.input.clone();
         for (i, c) in clone.chars().enumerate() {
-            self.next_token(i as u64, c);
+            if c == '\n' {
+                self.line += 1;
+            } else {
+                self.next_token(i as u64, c);
+            }
         }
     }
 }

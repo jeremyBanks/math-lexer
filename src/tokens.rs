@@ -1,3 +1,6 @@
+use std::fmt::Debug;
+
+#[derive(Debug)]
 pub enum ArithOperators {
     Plus,
     Minus,
@@ -5,6 +8,7 @@ pub enum ArithOperators {
     Div
 }
 
+#[derive(Debug)]
 pub enum ComparisonOperators {
     GreaterThan,
     GreaterThanOrEqual,
@@ -13,6 +17,7 @@ pub enum ComparisonOperators {
     Equal
 }
 
+#[derive(Debug)]
 pub enum TokenType {
     Identifier(String),
     Number(i32),

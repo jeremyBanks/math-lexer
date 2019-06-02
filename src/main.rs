@@ -30,7 +30,8 @@ struct Lexer {
     chars: Vec<char>,
     position: u64,
     line: u32,
-    column: u32
+    column: u32,
+    skip_char: bool
 }
 
 impl Lexer {
@@ -41,7 +42,8 @@ impl Lexer {
             chars: v,
             position: 0,
             line: 0,
-            column: 0
+            column: 0,
+            skip_char: false
         }
     }
 
@@ -67,6 +69,7 @@ impl Lexer {
         match c {
             '>' => {
                 if next_char_is_equals {
+                    self.skip_char = true;
                     Token { token_type: ComparisonOperator(GreaterThanOrEqual), line: self.line, column: self.column }
                 } else { 
                     Token { token_type: ComparisonOperator(GreaterThan), line: self.line, column: self.column }
@@ -74,6 +77,7 @@ impl Lexer {
             },
             '<' => {
                 if next_char_is_equals {
+                    self.skip_char = true;
                     Token { token_type: ComparisonOperator(LessThanOrEqual), line: self.line, column: self.column }
                 } else { 
                     Token { token_type: ComparisonOperator(LessThan), line: self.line, column: self.column }
@@ -81,12 +85,13 @@ impl Lexer {
             },
             '=' => {
                 if next_char_is_equals {
+                    self.skip_char = true;
                     Token { token_type: ComparisonOperator(Equal), line: self.line, column: self.column }
                 } else { 
                     Token { token_type: Assignment, line: self.line, column: self.column }
                 }
             },
-            _ => panic!("An error has occurred. Currently parsing at line {}: {}", self.line, c);
+            _ => panic!("An error has occurred. Currently parsing at line {}: {}", self.line, c)
         }
     }
 
@@ -114,6 +119,13 @@ impl Lexer {
         let mut count = chars.clone().count();
 
         while self.position <= count as u64 {
+            if self.skip_char == true {
+                chars.next();
+                self.position += 1;
+                self.skip_char = false;
+                continue;
+            }
+
             match chars.next() {
                 Some(c) => {
                     if c == '\n' {

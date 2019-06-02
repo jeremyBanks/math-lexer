@@ -1,21 +1,11 @@
 use std::str::Chars;
 use std::iter::Enumerate;
-use std::borrow::Cow;
-use std::convert::From;
+use std::rc::Rc;
 
 mod tokens;
 mod char_utils;
 
-use tokens::TokenType::{
-    Identifier,
-    Number,
-    ArithOperator,
-    ComparisonOperator,
-    Assignment,
-    LeftParen,
-    RightParen,
-    EndOfInput
-};
+use tokens::TokenType::*;
 
 use tokens::ComparisonOperators::*;
 
@@ -26,24 +16,24 @@ struct Token {
 }
 
 struct Lexer {
-    input: String,
+    input: Rc<String>,
     chars: Vec<char>,
     position: u64,
     line: u32,
     column: u32,
-    skip_char: bool
+    skip_chars: u8
 }
 
 impl Lexer {
     pub fn new(input: String) -> Self {
         let v: Vec<char> = input.clone().chars().collect();
         Lexer {
-            input: input,
+            input: Rc::new(input),
             chars: v,
             position: 0,
             line: 0,
             column: 0,
-            skip_char: false
+            skip_chars: 0
         }
     }
 
@@ -69,7 +59,7 @@ impl Lexer {
         match c {
             '>' => {
                 if next_char_is_equals {
-                    self.skip_char = true;
+                    self.skip_chars += 1;
                     Token { token_type: ComparisonOperator(GreaterThanOrEqual), line: self.line, column: self.column }
                 } else { 
                     Token { token_type: ComparisonOperator(GreaterThan), line: self.line, column: self.column }
@@ -77,7 +67,7 @@ impl Lexer {
             },
             '<' => {
                 if next_char_is_equals {
-                    self.skip_char = true;
+                    self.skip_chars += 1;
                     Token { token_type: ComparisonOperator(LessThanOrEqual), line: self.line, column: self.column }
                 } else { 
                     Token { token_type: ComparisonOperator(LessThan), line: self.line, column: self.column }
@@ -85,7 +75,7 @@ impl Lexer {
             },
             '=' => {
                 if next_char_is_equals {
-                    self.skip_char = true;
+                    self.skip_chars += 1;
                     Token { token_type: ComparisonOperator(Equal), line: self.line, column: self.column }
                 } else { 
                     Token { token_type: Assignment, line: self.line, column: self.column }
@@ -114,15 +104,15 @@ impl Lexer {
 
     pub fn run(&mut self) -> Vec<Token> {
         let mut tokens: Vec<Token> = vec![];
-        let clone = self.input.clone();
-        let mut chars = clone.chars(); 
-        let mut count = chars.clone().count();
+        let input: Rc<String> = self.input.clone();
+        let mut chars = input.chars();
+        let mut count = input.chars().count();
 
         while self.position <= count as u64 {
-            if self.skip_char == true {
+            if self.skip_chars > 0 {
                 chars.next();
-                self.position += 1;
-                self.skip_char = false;
+                self.position += self.skip_chars as u64;
+                self.skip_chars = 0;
                 continue;
             }
 

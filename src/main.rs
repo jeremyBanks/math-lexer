@@ -134,7 +134,9 @@ impl Lexer {
 
         while self.position <= count as u64 {
             if self.skip_chars > 0 {
-                chars.next();
+                for _ in 0..self.skip_chars {
+                    chars.next();
+                }
                 self.position += self.skip_chars as u64;
                 self.skip_chars = 0;
                 continue;

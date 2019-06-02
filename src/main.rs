@@ -17,6 +17,8 @@ use tokens::TokenType::{
     EndOfInput
 };
 
+use tokens::ComparisonOperators::*;
+
 struct Token {
     token_type: tokens::TokenType,
     line: u32,
@@ -25,7 +27,7 @@ struct Token {
 
 struct Lexer {
     input: String,
-    arr: Vec<char>,
+    chars: Vec<char>,
     position: u64,
     line: u32,
     column: u32
@@ -36,7 +38,7 @@ impl Lexer {
         let v: Vec<char> = input.clone().chars().collect();
         Lexer {
             input: input,
-            arr: v,
+            chars: v,
             position: 0,
             line: 0,
             column: 0
@@ -61,7 +63,31 @@ impl Lexer {
     }
 
     fn tokenize_comp_operator(&mut self, i: u64, c: char) -> Token {
-        unimplemented!()
+        let next_char_is_equals = self.chars[i as usize + 1] == '=';
+        match c {
+            '>' => {
+                if next_char_is_equals {
+                    Token { token_type: ComparisonOperator(GreaterThanOrEqual), line: self.line, column: self.column }
+                } else { 
+                    Token { token_type: ComparisonOperator(GreaterThan), line: self.line, column: self.column }
+                }
+            },
+            '<' => {
+                if next_char_is_equals {
+                    Token { token_type: ComparisonOperator(LessThanOrEqual), line: self.line, column: self.column }
+                } else { 
+                    Token { token_type: ComparisonOperator(LessThan), line: self.line, column: self.column }
+                }
+            },
+            '=' => {
+                if next_char_is_equals {
+                    Token { token_type: ComparisonOperator(Equal), line: self.line, column: self.column }
+                } else { 
+                    Token { token_type: Assignment, line: self.line, column: self.column }
+                }
+            },
+            _ => panic!("An error has occurred. Currently parsing at line {}: {}", self.line, c);
+        }
     }
 
     fn tokenize_arith_operator(&mut self, i: u64, c: char) -> Token {

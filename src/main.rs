@@ -6,13 +6,23 @@ mod tokens;
 mod char_utils;
 
 use tokens::TokenType::*;
-
 use tokens::ComparisonOperators::*;
+use tokens::ArithOperators::*;
 
 struct Token {
     token_type: tokens::TokenType,
     line: u32,
     column: u32
+}
+
+impl Token {
+    pub fn new(t: tokens::TokenType, line: u32, column: u32) -> Self {
+        Token {
+            token_type: t,
+            line: line,
+            column: column
+        }
+    }
 }
 
 struct Lexer {
@@ -60,25 +70,25 @@ impl Lexer {
             '>' => {
                 if next_char_is_equals {
                     self.skip_chars += 1;
-                    Token { token_type: ComparisonOperator(GreaterThanOrEqual), line: self.line, column: self.column }
+                    Token::new(ComparisonOperator(GreaterThanOrEqual), self.line, self.column) 
                 } else { 
-                    Token { token_type: ComparisonOperator(GreaterThan), line: self.line, column: self.column }
+                    Token::new(ComparisonOperator(GreaterThan), self.line, self.column) 
                 }
             },
             '<' => {
                 if next_char_is_equals {
                     self.skip_chars += 1;
-                    Token { token_type: ComparisonOperator(LessThanOrEqual), line: self.line, column: self.column }
+                    Token::new(ComparisonOperator(LessThanOrEqual), self.line, self.column) 
                 } else { 
-                    Token { token_type: ComparisonOperator(LessThan), line: self.line, column: self.column }
+                    Token::new(ComparisonOperator(LessThan), self.line, self.column) 
                 }
             },
             '=' => {
                 if next_char_is_equals {
                     self.skip_chars += 1;
-                    Token { token_type: ComparisonOperator(Equal), line: self.line, column: self.column }
+                    Token::new(ComparisonOperator(Equal), self.line, self.column) 
                 } else { 
-                    Token { token_type: Assignment, line: self.line, column: self.column }
+                    Token::new(Assignment, self.line, self.column)
                 }
             },
             _ => panic!("An error has occurred. Currently parsing at line {}: {}", self.line, c)
@@ -86,7 +96,21 @@ impl Lexer {
     }
 
     fn tokenize_arith_operator(&mut self, i: u64, c: char) -> Token {
-        unimplemented!()
+        match c {
+            '+' => {
+                Token::new(ArithOperator(Plus), self.line, self.column)
+            },
+            '-' => {
+                Token::new(ArithOperator(Minus), self.line, self.column)
+            },
+            '*' => {
+                Token::new(ArithOperator(Times), self.line, self.column)
+            },
+            '/' => {
+                Token::new(ArithOperator(Div), self.line, self.column)
+            },
+            _ => panic!("An error has occurred. Currently parsing at line {}: {}", self.line, c);
+        }
     }
 
     fn tokenize_paren(&mut self, c: char) -> Token {

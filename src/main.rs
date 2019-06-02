@@ -109,7 +109,7 @@ impl Lexer {
             '/' => {
                 Token::new(ArithOperator(Div), self.line, self.column)
             },
-            _ => panic!("An error has occurred. Currently parsing at line {}: {}", self.line, c);
+            _ => panic!("An error has occurred. Currently parsing at line {}: {}", self.line, c)
         }
     }
 

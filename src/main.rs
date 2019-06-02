@@ -1,28 +1,19 @@
-mod lexer;
-mod tokens;
-use lexer::Lexer;
-
 use std::env;
 use std::fs;
 
 pub fn main() {
-    let args: Vec<String> = env::args().collect();
-    let mut input: String;
+    let input: Rc<String> = Rc::new("test".to_string());
+    let mut chars = input.chars();
 
-    println!("input: {:?}", args);
-
-    if args.len() < 2 || args.len() > 3 {
-        println!("usage: lexer [--file] <filepath> | lexer <input>");
-        return;
+    loop {
+        match chars.next() {
+            Some(c) => {
+                println!("What is the value of c, here?");
+                if c == '\n' {
+                    println!("yes");
+                }
+            }
+            None => {}
+        }
     }
-
-    input = match args[1].as_ref() {
-        "--file" => fs::read_to_string(args[2].clone()).expect("Unable to read the requested file."),
-        _ => args[1].clone()
-    };
-
-    let mut lexer = Lexer::new(input);
-    let tokens = lexer.run();
-
-    println!("tokens: {:?}", tokens);
 }

@@ -1,169 +1,28 @@
-use std::str::Chars;
-use std::iter::Enumerate;
-use std::rc::Rc;
-
+mod lexer;
 mod tokens;
-mod char_utils;
+use lexer::Lexer;
 
-use tokens::TokenType::*;
-use tokens::ComparisonOperators::*;
-use tokens::ArithOperators::*;
+use std::env;
+use std::fs;
 
-struct Token {
-    token_type: tokens::TokenType,
-    line: u32,
-    column: u32
-}
+pub fn main() {
+    let args: Vec<String> = env::args().collect();
+    let mut input: String;
 
-impl Token {
-    pub fn new(t: tokens::TokenType, line: u32, column: u32) -> Self {
-        Token {
-            token_type: t,
-            line: line,
-            column: column
-        }
-    }
-}
+    println!("input: {:?}", args);
 
-struct Lexer {
-    input: Rc<String>,
-    chars: Vec<char>,
-    position: u64,
-    line: u32,
-    column: u32,
-    skip_chars: u8
-}
-
-impl Lexer {
-    pub fn new(input: String) -> Self {
-        let v: Vec<char> = input.clone().chars().collect();
-        Lexer {
-            input: Rc::new(input),
-            chars: v,
-            position: 0,
-            line: 0,
-            column: 0,
-            skip_chars: 0
-        }
+    if args.len() < 2 || args.len() > 3 {
+        println!("usage: lexer [--file] <filepath> | lexer <input>");
+        return;
     }
 
-    pub fn next_token(&mut self, i: u64, c: char) -> Token {
-        match c {
-            '(' | ')' => self.tokenize_paren(c),
-            '>' | '<' | '=' => self.tokenize_comp_operator(i, c),
-            '+' | '-' | '*' | '/' => self.tokenize_arith_operator(i, c),
-            _ => panic!("Unexpected character at line {}: {}", self.line, c)
-        }
-    }
+    input = match args[1].as_ref() {
+        "--file" => fs::read_to_string(args[2].clone()).expect("Unable to read the requested file."),
+        _ => args[1].clone()
+    };
 
-    fn tokenize_identifier(&mut self, first_char: char) -> Token {
-        unimplemented!()
-    }
+    let mut lexer = Lexer::new(input);
+    let tokens = lexer.run();
 
-    fn tokenize_number(&mut self, first_char: char) -> Token {
-        unimplemented!()
-    }
-
-    fn tokenize_comp_operator(&mut self, i: u64, c: char) -> Token {
-        let next_char_is_equals = self.chars[i as usize + 1] == '=';
-        match c {
-            '>' => {
-                if next_char_is_equals {
-                    self.skip_chars += 1;
-                    Token::new(ComparisonOperator(GreaterThanOrEqual), self.line, self.column) 
-                } else { 
-                    Token::new(ComparisonOperator(GreaterThan), self.line, self.column) 
-                }
-            },
-            '<' => {
-                if next_char_is_equals {
-                    self.skip_chars += 1;
-                    Token::new(ComparisonOperator(LessThanOrEqual), self.line, self.column) 
-                } else { 
-                    Token::new(ComparisonOperator(LessThan), self.line, self.column) 
-                }
-            },
-            '=' => {
-                if next_char_is_equals {
-                    self.skip_chars += 1;
-                    Token::new(ComparisonOperator(Equal), self.line, self.column) 
-                } else { 
-                    Token::new(Assignment, self.line, self.column)
-                }
-            },
-            _ => panic!("An error has occurred. Currently parsing at line {}: {}", self.line, c)
-        }
-    }
-
-    fn tokenize_arith_operator(&mut self, i: u64, c: char) -> Token {
-        match c {
-            '+' => {
-                Token::new(ArithOperator(Plus), self.line, self.column)
-            },
-            '-' => {
-                Token::new(ArithOperator(Minus), self.line, self.column)
-            },
-            '*' => {
-                Token::new(ArithOperator(Times), self.line, self.column)
-            },
-            '/' => {
-                Token::new(ArithOperator(Div), self.line, self.column)
-            },
-            _ => panic!("An error has occurred. Currently parsing at line {}: {}", self.line, c)
-        }
-    }
-
-    fn tokenize_paren(&mut self, c: char) -> Token {
-        let line = self.line;
-        let col = self.column;
-
-        self.column += 1;
-
-        if c == '(' {
-            Token { token_type: LeftParen, line: line, column: col }
-        } else {
-            Token { token_type: RightParen, line: line, column: col }
-        }
-    }
-
-    pub fn run(&mut self) -> Vec<Token> {
-        let mut tokens: Vec<Token> = vec![];
-        let input: Rc<String> = self.input.clone();
-        let mut chars = input.chars();
-        let mut count = input.chars().count();
-
-        while self.position <= count as u64 {
-            if self.skip_chars > 0 {
-                for _ in 0..self.skip_chars {
-                    chars.next();
-                }
-                self.position += self.skip_chars as u64;
-                self.skip_chars = 0;
-                continue;
-            }
-
-            match chars.next() {
-                Some(c) => {
-                    if c == '\n' {
-                        self.position += 1;
-                    } else {
-                        tokens.push(self.next_token(self.position as u64, c));
-                        self.position += 1;
-                    }
-
-                    count -= 1;
-                },
-                None => tokens.push(Token { token_type: EndOfInput, line: self.line, column: self.column})
-            }
-        }
-
-        tokens
-    }
-}
-
-fn main() {
-    let s = String::from("Hello world");
-    let e = s.chars().enumerate();
-    println!("{}", s);
-
+    println!("tokens: {:?}", tokens);
 }

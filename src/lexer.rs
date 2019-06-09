@@ -98,18 +98,10 @@ impl Lexer {
 
     fn tokenize_arith_operator(&mut self, i: u64, c: char) -> Token {
         match c {
-            '+' => {
-                Token::new(ArithOperator(Plus), self.line, self.column)
-            },
-            '-' => {
-                Token::new(ArithOperator(Minus), self.line, self.column)
-            },
-            '*' => {
-                Token::new(ArithOperator(Times), self.line, self.column)
-            },
-            '/' => {
-                Token::new(ArithOperator(Div), self.line, self.column)
-            },
+            '+' => Token::new(ArithOperator(Plus), self.line, self.column),
+            '-' => Token::new(ArithOperator(Minus), self.line, self.column),
+            '*' => Token::new(ArithOperator(Times), self.line, self.column),
+            '/' => Token::new(ArithOperator(Div), self.line, self.column),
             _ => panic!("An error has occurred. Currently parsing at line {}: {}", self.line, c)
         }
     }
@@ -117,8 +109,6 @@ impl Lexer {
     fn tokenize_paren(&mut self, c: char) -> Token {
         let line = self.line;
         let col = self.column;
-
-        self.column += 1;
 
         if c == '(' {
             Token::new(LeftParen, self.line, self.column)
@@ -131,9 +121,8 @@ impl Lexer {
         let mut tokens: Vec<Token> = vec![];
         let input: Rc<String> = self.input.clone();
         let mut chars = input.chars();
-        let mut count = input.chars().count();
 
-        while self.position <= count as u64 {
+        loop {
             if self.skip_chars > 0 {
                 for _ in 0..self.skip_chars {
                     chars.next();
@@ -147,17 +136,18 @@ impl Lexer {
                 Some(c) => {
                     if c == '\n' {
                         self.position += 1;
+                        self.line += 1;
                     } else {
-                        tokens.push(self.next_token(self.position as u64, c));
                         self.position += 1;
+                        self.column += 1;
+                        tokens.push(self.next_token(self.position as u64, c));
                     }
-
-                    count -= 1;
                 },
-                None => tokens.push(Token::new(EndOfInput, self.line, self.column))
+                None => {
+                    tokens.push(Token::new(EndOfInput, self.line, self.column));
+                    break tokens;
+                }
             }
         }
-
-        tokens
     }
 }

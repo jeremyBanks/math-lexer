@@ -1,0 +1,22 @@
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug math-lexer",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=math-lexer"
+                ],
+                "filter": {
+                    "name": "math-lexer",
+                    "kind": "bin"
+                }
+            },
+            "args": []
+        }
+    ]
+}

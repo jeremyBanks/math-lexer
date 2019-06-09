@@ -9,7 +9,7 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/target/debug/math-lexer.exe",
-            "args": ["(+-)"],
+            "args": ["(hello"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

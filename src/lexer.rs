@@ -49,16 +49,41 @@ impl Lexer {
     }
 
     pub fn next_token(&mut self, i: u64, c: char) -> Token {
-        match c {
-            '(' | ')' => self.tokenize_paren(c),
-            '>' | '<' | '=' => self.tokenize_comp_operator(i, c),
-            '+' | '-' | '*' | '/' => self.tokenize_arith_operator(i, c),
-            _ => panic!("Unexpected character at line {}: {}", self.line, c)
+        if c.is_alphabetic() {
+            self.tokenize_identifier(i, c)
+        } else {
+            match c {
+                '(' | ')' => self.tokenize_paren(c),
+                '>' | '<' | '=' => self.tokenize_comp_operator(i, c),
+                '+' | '-' | '*' | '/' => self.tokenize_arith_operator(i, c),
+                _ => panic!("Unexpected character at line {}: {}", self.line, c)
+            }
         }
     }
 
-    fn tokenize_identifier(&mut self, first_char: char) -> Token {
-        unimplemented!()
+    fn tokenize_identifier(&mut self, i: u64, first_char: char) -> Token {
+        let mut output: String = first_char.to_string();
+        let mut skip_chars: u8 = 1;
+        let mut next_char = self.chars[i as usize + 1];
+
+        while next_char.is_alphabetic() || next_char.is_digit(10) || next_char == '-' {
+            output.push(next_char);
+
+            skip_chars += 1;
+            let next_index = i as usize + skip_chars as usize;
+            if next_index >= self.chars.len() {
+                break;
+            }
+
+            next_char = self.chars[next_index];
+        }
+        
+        self.skip_chars = skip_chars;
+        if output.is_empty() {
+            panic!("An error has occurred. Currently parsing at line {}: {}", self.line, first_char);
+        }
+
+        Token::new(Identifier(output), self.line, self.column)
     }
 
     fn tokenize_number(&mut self, first_char: char) -> Token {
@@ -140,7 +165,7 @@ impl Lexer {
                     } else {
                         self.position += 1;
                         self.column += 1;
-                        tokens.push(self.next_token(self.position as u64, c));
+                        tokens.push(self.next_token(self.position - 1 as u64, c));
                     }
                 },
                 None => {

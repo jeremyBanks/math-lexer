@@ -16,7 +16,19 @@
                     "kind": "bin"
                 }
             },
-            "args": []
+            "args": ["(test)"]
+        },
+        {
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/debug/math-lexer.exe",
+            "args": ["(test)"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true
         }
     ]
+}
 }

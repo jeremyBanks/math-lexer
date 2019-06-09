@@ -4,4 +4,8 @@ version = "0.1.0"
 authors = ["ooronning <christopher.a.ronning@gmail.com>"]
 edition = "2018"
 
+[profile.dev]
+opt-level = 0
+debug = true
+
 [dependencies]

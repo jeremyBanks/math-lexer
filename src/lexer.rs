@@ -78,7 +78,7 @@ impl Lexer {
             next_char = self.chars[next_index];
         }
         
-        self.skip_chars = skip_chars;
+        self.skip_chars = output.len() as u8;
         if output.is_empty() {
             panic!("An error has occurred. Currently parsing at line {}: {}", self.line, first_char);
         }
@@ -156,12 +156,13 @@ impl Lexer {
                 self.skip_chars = 0;
                 continue;
             }
-
             match chars.next() {
                 Some(c) => {
                     if c == '\n' {
                         self.position += 1;
                         self.line += 1;
+                    } else if c == ' ' {
+                        self.position += 1;
                     } else {
                         self.position += 1;
                         self.column += 1;

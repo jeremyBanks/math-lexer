@@ -1,6 +1,7 @@
 mod lexer;
 mod tokens;
 use lexer::Lexer;
+mod fsm;
 
 use std::env;
 use std::fs;

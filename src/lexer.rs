@@ -9,6 +9,9 @@ use tokens::TokenType::*;
 use tokens::ComparisonOperators::*;
 use tokens::ArithOperators::*;
 
+use crate::fsm::FSM;
+
+
 #[derive(Debug)]
 pub struct Token {
     token_type: tokens::TokenType,
@@ -51,6 +54,8 @@ impl Lexer {
     pub fn next_token(&mut self, i: u64, c: char) -> Token {
         if c.is_alphabetic() {
             self.tokenize_identifier(i, c)
+        } else if c.is_numeric() {
+            self.tokenize_number(i, c)
         } else {
             match c {
                 '(' | ')' => self.tokenize_paren(c),
@@ -86,7 +91,7 @@ impl Lexer {
         Token::new(Identifier(output), self.line, self.column)
     }
 
-    fn tokenize_number(&mut self, first_char: char) -> Token {
+    fn tokenize_number(&mut self, i: u64, first_char: char) -> Token {
         unimplemented!()
     }
 

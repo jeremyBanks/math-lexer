@@ -9,8 +9,10 @@ use tokens::TokenType::*;
 use tokens::ComparisonOperators::*;
 use tokens::ArithOperators::*;
 
-use crate::fsm::FSM;
-
+use crate::fsm::{ 
+    FSM, 
+    NumberFSM 
+};
 
 #[derive(Debug)]
 pub struct Token {

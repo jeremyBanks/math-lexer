@@ -6,6 +6,7 @@ use lexer::Lexer;
 
 use std::env;
 use std::fs;
+use std::str::Chars;
 
 pub fn main() {
     let args: Vec<String> = env::args().collect();

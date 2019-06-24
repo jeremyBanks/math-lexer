@@ -11,8 +11,10 @@ use tokens::ArithOperators::*;
 
 use crate::fsm::{ 
     FSM, 
-    NumberFSM 
+    StateRules
 };
+
+const WHITESPACE_CHARS: [char; 2] = [' ', '\n'];
 
 #[derive(Debug)]
 pub struct Token {
@@ -94,6 +96,21 @@ impl Lexer {
     }
 
     fn tokenize_number(&mut self, i: u64, first_char: char) -> Token {
+        // count the number of characters from i to the first whitespace char
+        let index = (i + 1) as usize;
+        let mut number_str = String::from(first_char.to_string());
+
+        while let Some(c) = self.chars.get(index) {
+            if WHITESPACE_CHARS.contains(c) {
+                // init FSM
+                break;
+            } else {
+                number_str.push(*c);
+            }
+        }
+
+        // run fsm and return token.
+        // fsm.run
         unimplemented!()
     }
 

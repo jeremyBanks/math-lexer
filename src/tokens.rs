@@ -20,7 +20,8 @@ pub enum ComparisonOperators {
 #[derive(Debug)]
 pub enum TokenType {
     Identifier(String),
-    Number(i32),
+    // we'll use a String to represent potentially ints, floats, and exponents
+    Number(String), 
     ArithOperator(ArithOperators),
     ComparisonOperator(ComparisonOperators),
     Assignment,

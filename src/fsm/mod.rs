@@ -10,16 +10,25 @@ pub trait StateRules: Sized {
 struct NumberFSMStateRule;
 impl StateRules for NumberFSMStateRule {
     type ReturnType = u32;
+    // accepting states are 2, 4, and 7
     fn next_state(fsm: &mut FSM<Self>, input: char) -> u8 {
+
         unimplemented!()    
     }
 }
 
+// TODO: possibly remove is_valid, as result is wrapped in an Option
+struct FSMResult {
+    is_valid: bool,
+    result: Option<String>,
+}
+
+// TODO: attempt to remove PhantomData and state_rules_type
 pub struct FSM<T: StateRules> {
     states: Vec<u8>,
     initial_state: u8,
     accepting_states: Vec<u8>,
-    state_rules_type: PhantomData<T>
+    state_rules_type: PhantomData<T>,
 }
 
 impl<T: StateRules> FSM<T> {
@@ -33,17 +42,24 @@ impl<T: StateRules> FSM<T> {
             states: states,
             initial_state: initial_state,
             accepting_states: accepting_states,
-            state_rules_type: PhantomData
+            state_rules_type: PhantomData,
         }
     }
 
-    fn run(&mut self, input: String) -> Option<T> {
+    // We'll need to figure out a way to return the actual state output
+    // so that the caller can push it to the Vec<Token>
+    fn run(&mut self, input: String) -> FSMResult {
         let mut state = self.initial_state;
-        let mut chs = input.chars();
 
+        for c in input.chars() {
+            state = T::next_state(self, c);
+        }
 
-        T::next_state(self, chs.next().unwrap());
+        let is_valid = self.accepting_states.contains(&state);
 
-        unimplemented!()
+        FSMResult {
+            is_valid: is_valid,
+            result: if is_valid { Some(input) } else { None }
+        }
     }
 }

@@ -97,7 +97,7 @@ impl Lexer {
 
     fn tokenize_number(&mut self, i: u64, first_char: char) -> Token {
         // count the number of characters from i to the first whitespace char
-        let index = (i + 1) as usize;
+        let mut index = (i + 1) as usize;
         let mut number_str = String::from(first_char.to_string());
 
         while let Some(c) = self.chars.get(index) {
@@ -106,6 +106,7 @@ impl Lexer {
                 break;
             } else {
                 number_str.push(*c);
+                index += 1;
             }
         }
 

@@ -16,12 +16,12 @@ pub struct FSMResult {
 pub struct FSM<T: StateRules> {
     initial_state: T::States,
     accepting_states: Vec<T::States>,
-    state_rules_type: PhantomData<T>
+    state_rules_type: PhantomData<T>,
 }
 
 impl<T: StateRules> FSM<T> {
     pub fn new(initial_state: T::States, accepting_states: Vec<T::States>) -> Self {
-        Self { 
+        Self {
             initial_state: initial_state,
             accepting_states: accepting_states,
             state_rules_type: PhantomData,

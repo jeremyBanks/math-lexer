@@ -1,27 +1,29 @@
-use std::str::Chars;
+use std::fmt::Debug;
 use std::iter::Enumerate;
 use std::rc::Rc;
-use std::fmt::Debug;
+use std::str::Chars;
 
-#[path = "tokens.rs"] mod tokens;
+// JB: I need to make this public to write a test because the #[path] causes this to be a distinct
+// type, that isn't comparable to the type I get from importing `tokens` directly in my test.
+// I also needed to make the struct fields public below because there was no non-private way
+// to construct the expected values for a test.
+#[path = "tokens.rs"]
+pub mod tokens;
 
-use tokens::TokenType::*;
-use tokens::ComparisonOperators::*;
 use tokens::ArithOperators::*;
+use tokens::ComparisonOperators::*;
+use tokens::TokenType::*;
 
-use crate::number_state_rules::{
-    NumberStateRules,
-    NumberStates
-};
 use crate::fsm::FSM;
+use crate::number_state_rules::{NumberStateRules, NumberStates};
 
 const WHITESPACE_CHARS: [char; 2] = [' ', '\n'];
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Token {
-    token_type: tokens::TokenType,
-    line: u32,
-    column: u32
+    pub token_type: tokens::TokenType,
+    pub line: u32,
+    pub column: u32,
 }
 
 impl Token {
@@ -29,18 +31,18 @@ impl Token {
         Token {
             token_type: t,
             line: line,
-            column: column
+            column: column,
         }
     }
 }
 
 pub struct Lexer {
-    input: Rc<String>,
-    chars: Vec<char>,
-    position: u64,
-    line: u32,
-    column: u32,
-    skip_chars: u8
+    pub input: Rc<String>,
+    pub chars: Vec<char>,
+    pub position: u64,
+    pub line: u32,
+    pub column: u32,
+    pub skip_chars: u8,
 }
 
 impl Lexer {
@@ -52,7 +54,7 @@ impl Lexer {
             position: 0,
             line: 0,
             column: 0,
-            skip_chars: 0
+            skip_chars: 0,
         }
     }
 
@@ -66,7 +68,7 @@ impl Lexer {
                 '(' | ')' => self.tokenize_paren(c),
                 '>' | '<' | '=' => self.tokenize_comp_operator(i, c),
                 '+' | '-' | '*' | '/' => self.tokenize_arith_operator(i, c),
-                _ => panic!("Unexpected character at line {}: {}", self.line, c)
+                _ => panic!("Unexpected character at line {}: {}", self.line, c),
             }
         }
     }
@@ -87,10 +89,13 @@ impl Lexer {
 
             next_char = self.chars[next_index];
         }
-        
+
         self.skip_chars = output.len() as u8;
         if output.is_empty() {
-            panic!("An error has occurred. Currently parsing at line {}: {}", self.line, first_char);
+            panic!(
+                "An error has occurred. Currently parsing at line {}: {}",
+                self.line, first_char
+            );
         }
 
         Token::new(Identifier(output), self.line, self.column)
@@ -113,7 +118,7 @@ impl Lexer {
         let accepting_states = vec![
             NumberStates::Integer,
             NumberStates::NumberWithFractionalPart,
-            NumberStates::NumberWithExponent    
+            NumberStates::NumberWithExponent,
         ];
         let fsm: FSM<NumberStateRules> = FSM::new(NumberStates::Initial, accepting_states);
         let input_clone = number_str.clone(); // in case we need to throw an error later
@@ -123,8 +128,11 @@ impl Lexer {
             Some(value) => {
                 self.skip_chars = value.len() as u8;
                 Token::new(Number(value), self.line, self.column)
-            },
-            None => panic!("Unexpected token {}. Were you trying to define a number?", input_clone)
+            }
+            None => panic!(
+                "Unexpected token {}. Were you trying to define a number?",
+                input_clone
+            ),
         }
     }
 
@@ -134,28 +142,35 @@ impl Lexer {
             '>' => {
                 if next_char_is_equals {
                     self.skip_chars += 1;
-                    Token::new(ComparisonOperator(GreaterThanOrEqual), self.line, self.column) 
-                } else { 
-                    Token::new(ComparisonOperator(GreaterThan), self.line, self.column) 
+                    Token::new(
+                        ComparisonOperator(GreaterThanOrEqual),
+                        self.line,
+                        self.column,
+                    )
+                } else {
+                    Token::new(ComparisonOperator(GreaterThan), self.line, self.column)
                 }
-            },
+            }
             '<' => {
                 if next_char_is_equals {
                     self.skip_chars += 1;
-                    Token::new(ComparisonOperator(LessThanOrEqual), self.line, self.column) 
-                } else { 
-                    Token::new(ComparisonOperator(LessThan), self.line, self.column) 
+                    Token::new(ComparisonOperator(LessThanOrEqual), self.line, self.column)
+                } else {
+                    Token::new(ComparisonOperator(LessThan), self.line, self.column)
                 }
-            },
+            }
             '=' => {
                 if next_char_is_equals {
                     self.skip_chars += 1;
-                    Token::new(ComparisonOperator(Equal), self.line, self.column) 
-                } else { 
+                    Token::new(ComparisonOperator(Equal), self.line, self.column)
+                } else {
                     Token::new(Assignment, self.line, self.column)
                 }
-            },
-            _ => panic!("An error has occurred. Currently parsing at line {}: {}", self.line, c)
+            }
+            _ => panic!(
+                "An error has occurred. Currently parsing at line {}: {}",
+                self.line, c
+            ),
         }
     }
 
@@ -165,7 +180,10 @@ impl Lexer {
             '-' => Token::new(ArithOperator(Minus), self.line, self.column),
             '*' => Token::new(ArithOperator(Times), self.line, self.column),
             '/' => Token::new(ArithOperator(Div), self.line, self.column),
-            _ => panic!("An error has occurred. Currently parsing at line {}: {}", self.line, c)
+            _ => panic!(
+                "An error has occurred. Currently parsing at line {}: {}",
+                self.line, c
+            ),
         }
     }
 
@@ -206,7 +224,7 @@ impl Lexer {
                         self.column += 1;
                         tokens.push(self.next_token(self.position - 1 as u64, c));
                     }
-                },
+                }
                 None => {
                     tokens.push(Token::new(EndOfInput, self.line, self.column));
                     break tokens;

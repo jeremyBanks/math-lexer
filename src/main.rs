@@ -1,7 +1,7 @@
-mod lexer;
-mod tokens;
 mod fsm;
+mod lexer;
 mod number_state_rules;
+mod tokens;
 
 use lexer::Lexer;
 
@@ -21,8 +21,10 @@ pub fn main() {
     }
 
     input = match args[1].as_ref() {
-        "--file" => fs::read_to_string(args[2].clone()).expect("Unable to read the requested file."),
-        _ => args[1].clone()
+        "--file" => {
+            fs::read_to_string(args[2].clone()).expect("Unable to read the requested file.")
+        }
+        _ => args[1].clone(),
     };
 
     let mut lexer = Lexer::new(input);

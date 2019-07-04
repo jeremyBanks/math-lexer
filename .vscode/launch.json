@@ -5,7 +5,7 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug math-lexer",
+            "name": "Debug math-lexer with LLVM",
             "cargo": {
                 "args": [
                     "build",
@@ -19,6 +19,14 @@
             "args": ["(test)"]
         },
         {
+            "type": "gdb",
+            "request": "launch",
+            "name": "Debug math-lexer with GDB",
+            "target": "./target/debug/math-lexer",
+            "cwd": "${workspaceRoot}",
+            "gdbpath": "rust-gdb"
+        },
+        {
             "name": "(Windows) Launch",
             "type": "cppvsdbg",
             "request": "launch",
@@ -30,5 +38,4 @@
             "externalConsole": true
         }
     ]
-}
 }

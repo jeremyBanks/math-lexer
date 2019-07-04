@@ -13,7 +13,7 @@ use tokens::TokenType::*;
 use crate::fsm::FSM;
 use crate::number_state_rules::{NumberStateRules, NumberStates};
 
-const WHITESPACE_CHARS: [char; 2] = [' ', '\n'];
+const WHITESPACE_CHARS: [char; 3] = [' ', '\n', '\r'];
 
 #[derive(Debug)]
 pub struct Token {
@@ -104,6 +104,11 @@ impl Lexer {
 
         while let Some(c) = self.chars.get(index) {
             if WHITESPACE_CHARS.contains(c) {
+                if *c == '\r' && self.chars[index + 1] == '\n' {
+                    index += 2;
+                } else {
+                    index += 1;
+                }
                 break;
             } else {
                 number_str.push(*c);
@@ -184,9 +189,6 @@ impl Lexer {
     }
 
     fn tokenize_paren(&mut self, c: char) -> Token {
-        let line = self.line;
-        let col = self.column;
-
         if c == '(' {
             Token::new(LeftParen, self.line, self.column)
         } else {
@@ -199,6 +201,7 @@ impl Lexer {
         let input: Rc<String> = self.input.clone();
         let mut chars = input.chars();
 
+        self.line += 1;
         loop {
             if self.skip_chars > 0 {
                 for _ in 0..self.skip_chars {
@@ -210,8 +213,13 @@ impl Lexer {
             }
             match chars.next() {
                 Some(c) => {
-                    if c == '\n' {
+                    if c == '\r' && self.chars[(self.position + 1) as usize] == '\n' {
+                        self.position += 2;
+                        self.column = 0;
+                        self.line = 1;
+                    } else if c == '\n' {
                         self.position += 1;
+                        self.column = 0;
                         self.line += 1;
                     } else if c == ' ' {
                         self.position += 1;

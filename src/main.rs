@@ -1,6 +1,7 @@
 mod lexer;
 mod tokens;
 mod fsm;
+mod number_state_rules;
 
 use lexer::Lexer;
 

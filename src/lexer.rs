@@ -9,10 +9,11 @@ use tokens::TokenType::*;
 use tokens::ComparisonOperators::*;
 use tokens::ArithOperators::*;
 
-use crate::fsm::{ 
-    FSM, 
-    StateRules
+use crate::number_state_rules::{
+    NumberStateRules,
+    NumberStates
 };
+use crate::fsm::FSM;
 
 const WHITESPACE_CHARS: [char; 2] = [' ', '\n'];
 
@@ -102,7 +103,6 @@ impl Lexer {
 
         while let Some(c) = self.chars.get(index) {
             if WHITESPACE_CHARS.contains(c) {
-                // init FSM
                 break;
             } else {
                 number_str.push(*c);
@@ -110,9 +110,19 @@ impl Lexer {
             }
         }
 
-        // run fsm and return token.
-        // fsm.run
-        unimplemented!()
+        let accepting_states = vec![
+            NumberStates::Integer,
+            NumberStates::NumberWithFractionalPart,
+            NumberStates::NumberWithExponent    
+        ];
+        let fsm: FSM<NumberStateRules> = FSM::new(NumberStates::Initial, accepting_states);
+        let input_clone = number_str.clone(); // in case we need to throw an error later
+        let result = fsm.run(number_str);
+
+        match result {
+            Some(value) => Token::new(Number(value), self.line, self.column),
+            None => panic!("Unexpected token {}. Were you trying to define a number?", input_clone)
+        }
     }
 
     fn tokenize_comp_operator(&mut self, i: u64, c: char) -> Token {

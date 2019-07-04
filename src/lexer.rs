@@ -237,3 +237,11 @@ impl Lexer {
         }
     }
 }
+
+/// Can we lex a input without crashing?
+#[test]
+fn sanity_test() {
+    let input = "number = 12.34e-123".to_string();
+    let mut lexer = Lexer::new(input);
+    let _tokens = lexer.run();
+}

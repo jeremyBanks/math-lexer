@@ -1,5 +1,5 @@
-use std::fmt::Debug;
 use crate::fsm::StateRules;
+use std::fmt::Debug;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum NumberStates {
@@ -9,7 +9,7 @@ pub enum NumberStates {
     NumberWithFractionalPart,
     BeginExponent,
     BeginSignedExponent,
-    NumberWithExponent
+    NumberWithExponent,
 }
 
 pub struct NumberStateRules;
@@ -28,17 +28,17 @@ impl StateRules for NumberStateRules {
                     match input {
                         '.' => NumberStates::BeginFractionalPart,
                         'e' | 'E' => NumberStates::BeginExponent,
-                        _ => panic!("Unexpected token {}", input)
+                        _ => panic!("Unexpected token {}", input),
                     }
                 }
-            },
+            }
             NumberStates::BeginFractionalPart => {
                 if input.is_numeric() {
                     NumberStates::NumberWithFractionalPart
                 } else {
                     panic!("Unexpected token {}", input)
                 }
-            },
+            }
             NumberStates::NumberWithFractionalPart => {
                 if input.is_numeric() {
                     NumberStates::NumberWithFractionalPart
@@ -47,7 +47,7 @@ impl StateRules for NumberStateRules {
                 } else {
                     panic!("Unexpected token {}", input)
                 }
-            },
+            }
             NumberStates::BeginExponent => {
                 if input.is_numeric() {
                     NumberStates::NumberWithExponent
@@ -56,14 +56,14 @@ impl StateRules for NumberStateRules {
                 } else {
                     panic!("Unexpected token {}", input)
                 }
-            },
+            }
             NumberStates::BeginSignedExponent => {
                 if input.is_numeric() {
                     NumberStates::NumberWithExponent
                 } else {
                     panic!("Unexpected token {}", input)
                 }
-            },
+            }
             NumberStates::NumberWithExponent => {
                 if input.is_numeric() {
                     NumberStates::NumberWithExponent
@@ -71,7 +71,7 @@ impl StateRules for NumberStateRules {
                     panic!("Unexpected token {}", input)
                 }
             }
-            _ => panic!("An error has occurred.")
+            _ => panic!("An error has occurred."),
         }
     }
 }

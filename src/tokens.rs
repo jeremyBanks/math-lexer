@@ -5,7 +5,7 @@ pub enum ArithOperators {
     Plus,
     Minus,
     Times,
-    Div
+    Div,
 }
 
 #[derive(Debug)]
@@ -14,18 +14,18 @@ pub enum ComparisonOperators {
     GreaterThanOrEqual,
     LessThan,
     LessThanOrEqual,
-    Equal
+    Equal,
 }
 
 #[derive(Debug)]
 pub enum TokenType {
     Identifier(String),
     // we'll use a String to represent potentially ints, floats, and exponents
-    Number(String), 
+    Number(String),
     ArithOperator(ArithOperators),
     ComparisonOperator(ComparisonOperators),
     Assignment,
     LeftParen,
     RightParen,
-    EndOfInput
+    EndOfInput,
 }

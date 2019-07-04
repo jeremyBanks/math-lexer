@@ -120,7 +120,10 @@ impl Lexer {
         let result = fsm.run(number_str);
 
         match result {
-            Some(value) => Token::new(Number(value), self.line, self.column),
+            Some(value) => {
+                self.skip_chars = value.len() as u8;
+                Token::new(Number(value), self.line, self.column)
+            },
             None => panic!("Unexpected token {}. Were you trying to define a number?", input_clone)
         }
     }
